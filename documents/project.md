@@ -1,4 +1,4 @@
-# Near Real Time Monitoring Of Hospital Acquired Infections in the intensive Care Unit
+# Near Real-Time Monitoring Of Hospital Acquired Infections in the intensive Care Unit
 A protocol hypothesis
 
 ## Objective
