@@ -72,7 +72,7 @@ business intelligence (BI) systems.
 
 [FHIRbundle live on Colab](https://colab.research.google.com/drive/130KMU1Tu5Ub4w9le-nqkwKNB4U_ESFWu)
 
-The generated output is a JSON file containing a **FHIR bundle** for a CLABSI based on simulated data, downloadable at [ica_events_bundle.json](../data/ica_events_bundle.json).
+The generated output is a JSON file containing a **FHIR bundle** for a CLABSI based on simulated data, downloadable at [ica_events_bundle.json](data/ica_events_bundle.json).
 
 Once downloaded, it can be:  
 - Viewed in a browser (most modern browsers support JSON format)  
