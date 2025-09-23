@@ -1,0 +1,68 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Device",
+        "id": "device-12345",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "26412008",
+              "display": "Central venous catheter"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "Patient/12345"
+        },
+        "period": {
+          "start": "2025-09-10T12:00:00",
+          "end": "2025-09-21T11:58:45.129487"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-12345",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "600-7",
+              "display": "Bacteria identified in Blood by Culture"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/12345"
+        },
+        "effectiveDateTime": "2025-09-20T10:30:00",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "KLEBSIELLA_PNEUMONIAE",
+              "display": "Klebsiella pneumoniae"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
