@@ -68,6 +68,18 @@ business intelligence (BI) systems.
 
 ### 10.3 Python Prototype Code (Direct Digistat → FHIR Feed) on Colab
 
+[FHIRbundle.py](https://github.com/kapefier/ICU-HAI_dashboard/blob/main/code/FHIRbundle.py)
+
+[FHIRbundle live on Colab](https://colab.research.google.com/drive/130KMU1Tu5Ub4w9le-nqkwKNB4U_ESFWu)
+
+The generated output is a JSON file containing a **FHIR bundle** for a CLABSI based on simulated data, downloadable at [ica_events_bundle.json](/../data/ica_events_bundle.json).
+
+Once downloaded, it can be:  
+- Viewed in a browser (most modern browsers support JSON format)  
+- Validated using an online tool, such as the [**HL7 FHIR Validator**](https://validator.fhir.org/)
+
+
+
 ### 10.4 List of Abbreviations
 | Abbreviation | Expansion | Description |
 |--------------|-----------|-------------|
