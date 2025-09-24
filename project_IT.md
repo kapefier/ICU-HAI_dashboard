@@ -242,9 +242,8 @@ Ipotizzo qualcosa del genere:
 ### 10.1 Codice Python prototipo
 
 Gli eventi ICA potrebbero essere prodotti come FHIR bundle, applicando le regole di identificazione ad un dataset che proviene da Digistat, di cui ancora non abbiamo i dettagli. Utilizzo un mock dataset per dimostrare la produzione del bundle.
-Il codice completo può essere scaricato al seguente link
-[*FHIRbundle.ipyb*](https://colab.research.google.com/drive/130KMU1Tu5Ub4w9le-nqkwKNB4U_ESFWu?usp=drive_link).
-
+Il codice completo può essere scaricato al seguente link [*FHIRbundle.ipyb*](/data/FHIRbundle.ipyb).
+ 
 Di seguito, un frammento del codice dimostrativo: 
 
 ```python
@@ -341,14 +340,13 @@ for event in ica_events:
  
 
 ```
+E' possibile eseguire il codice completo in Google Colaboratory: \
+[![Apri in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/130KMU1Tu5Ub4w9le-nqkwKNB4U_ESFWu?usp=drive_link)
 
-L'output generato è un file JSON contenente il bundle FHIR di una CLABSI
-su dati simulati, scaricabile al link
-[*ica\_events\_bundle.json*](https://drive.google.com/file/d/1vyNou_uXotGaCYficPWVR-s1tyxq4RWU/view?usp=drive_link).
+L'output generato è un file JSON contenente il bundle FHIR di una CLABSI su dati simulati, scaricabile al link
+[*ica\_events\_bundle.json*](data/ica_events_bundle.json).
 
-Una volta scaricato può essere visualizzato in un browser, la maggior
-ormai supportano il formato JSON, o validato con uno strumento online
-tipo [*HL7 FHIR validator*](https://hl7.org/fhir/validator/).
+Una volta scaricato può essere visualizzato in un browser, la maggior ormai supportano il formato JSON, o validato con uno strumento online  tipo [*HL7 FHIR validator*](https://hl7.org/fhir/validator/).
 
 In effetti, i passi successivi potrebbero essere:
 
@@ -400,7 +398,7 @@ In effetti, i passi successivi potrebbero essere:
     principles.** *BMC Public Health* **24**, 392 (2024).
     <https://doi.org/10.1186/s12889-024-17841-2>
 
-[^1]:  in alternatie, si deve far uso della datawarehouse con query
+[^1]:  in alternativa, si deve far uso della datawarehouse con query
     PostegreSQL
 
 [^2]:  ad es. Tecnologia Shiny con linguaggio R o Python
