@@ -161,13 +161,11 @@ OUTPUT:
 ```
  
 ## 6. Feed diretto e standard di interoperabilita'
--   **Feed diretto Digistat:** SQL o API REST/FHIR → microservizio ETL.
--   **Output standard:**  
-  -  HL7 ORU v2 (per legacy e PROSAFE).
- -    FHIR R4 (Observation, Device, Patient) per gestione multipaziente,
-    dashboard e invio API.
--   **Vantaggi:** near real-time, standardizzato, integrabile con
-    PROSAFE, riduce dipendenza da data warehouse aziendale.
+- **Feed diretto Digistat:** SQL o API REST/FHIR → microservizio ETL.
+- **Output standard:**  
+  - HL7 ORU v2 (per legacy e PROSAFE).
+  - FHIR R4 (Observation, Device, Patient) per gestione multipaziente,dashboard e invio API.
+- **Vantaggi:** near real-time, standardizzato, integrabile con PROSAFE, riduce dipendenza da data warehouse aziendale.
 
 ## 7. Validazione e controllo qualita'
 
@@ -186,82 +184,62 @@ Ipotizzo qualcosa del genere:
 
 ## 8. Strumenti e tecnologie ipotizzate
 
-
 -   **Middleware / Integration engine:** Mirth Connect, Digistat API.
-
 
 -   **Microservizio ETL:** Python (pandas, sqlalchemy), Node.js, o altro
     linguaggio aziendale.
 
-
 -   **Standard di interoperabilità:** HL7 v2, FHIR R4.
-
 
 -   **Data storage temporaneo:** filesystem sicuro o DB locale per
     elaborazioni intermedie.
 
-
--   **BI / dashboard:** web-app custom made[^2] (per me scelta
-    consigliata), oppure Power BI, Tableau, o web-app interne.
+-   **BI / dashboard:** web-app custom made[^2] (per me scelta consigliata), oppure Power BI, Tableau o altri prodotti commerciali.
 
 ## 9. Template mapping e checklist
 
--   **Mapping Digistat → PROSAFE:** vedi **Appendice**
--   **Checklist validazione manuale:** vedi **Appendice **(confronto automatico/manuale e metriche).
-
-## 10. Appendici
-
-
-### 10.1 Template mapping Digistat → PROSAFE
-
+### 9.1   **Mapping Digistat → PROSAFE:**
 | **Campo_PROSAFE**       | **Descrizione**                | **Campo_Digistat_Esempio**       | **Note**                                  |
 |-------------------------|-------------------------------|---------------------------------|------------------------------------------|
-| patient_id              | Identificativo paziente       | admission.patient_id            | Anonimizzato/pseudonimizzato            |
-| admission_id            | ID ricovero                   | admission.admission_id          | Collegato a degenza TI                   |
-| icu_entry_date          | Data ingresso TI              | admission.icu_in_datetime       | Obbligatorio                             |
-| icu_exit_date           | Data uscita TI                | admission.icu_out_datetime      | Obbligatorio                             |
-| event_id                | ID evento ICA                 | generato algoritmo              | Progressivo                               |
-| event_date              | Data evento ICA               | ica_events.event_datetime       | Data primo criterio positivo             |
-| event_type              | Tipo ICA                      | ica_events.event_type           | Codice standard PROSAFE                  |
-| device_type             | Dispositivo associato         | device_sessions.device_type     | Valorizzare se presente                  |
-| device_insertion_date   | Data inserimento dispositivo  | device_sessions.start_datetime  | Se applicabile                           |
-| device_removal_date     | Data rimozione dispositivo    | device_sessions.stop_datetime   | Se applicabile                           |
-| specimen_type           | Tipo campione                 | microbiology.sample_type        | Uniformare a codici PROSAFE             |
-| specimen_date           | Data prelievo                 | microbiology.sample_datetime    | Obbligatorio se microbiologia positiva  |
-| microorganism           | Agente eziologico             | microbiology.organism           | Codice standard                           |
-| antibiogram             | Profilo di resistenza         | microbiology.antibiogram        | Standard S/I/R                            |
-| ab_start                | Inizio terapia antibiotica    | therapy.start_datetime          | Facoltativo                               |
-| ab_end                  | Fine terapia antibiotica      | therapy.stop_datetime           | Facoltativo                               |
-| outcome                 | Esito paziente                | admission.outcome               | Codifica standard PROSAFE                |
-| notes                   | Note libere                   | event_notes.text                | Campi opzionali                           |
+| _patient_id_              | Identificativo paziente       | admission.patient_id            | Anonimizzato/pseudonimizzato            |
+| _admission_id_            | ID ricovero                   | admission.admission_id          | Collegato a degenza TI                   |
+| _icu_entry_date_          | Data ingresso TI              | admission.icu_in_datetime       | Obbligatorio                             |
+| _icu_exit_date_           | Data uscita TI                | admission.icu_out_datetime      | Obbligatorio                             |
+| _event_id_                | ID evento ICA                 | generato algoritmo              | Progressivo                               |
+| _event_date_              | Data evento ICA               | ica_events.event_datetime       | Data primo criterio positivo             |
+| _event_type_              | Tipo ICA                      | ica_events.event_type           | Codice standard PROSAFE                  |
+| _device_type_             | Dispositivo associato         | device_sessions.device_type     | Valorizzare se presente                  |
+| _device_insertion_date_   | Data inserimento dispositivo  | device_sessions.start_datetime  | Se applicabile                           |
+| _device_removal_date_     | Data rimozione dispositivo    | device_sessions.stop_datetime   | Se applicabile                           |
+| _specimen_type_           | Tipo campione                 | microbiology.sample_type        | Uniformare a codici PROSAFE             |
+| _specimen_date_           | Data prelievo                 | microbiology.sample_datetime    | Obbligatorio se microbiologia positiva  |
+| _microorganism_           | Agente eziologico             | microbiology.organism           | Codice standard                           |
+| _antibiogram_             | Profilo di resistenza         | microbiology.antibiogram        | Standard S/I/R                            |
+| _ab_start_                | Inizio terapia antibiotica    | therapy.start_datetime          | Facoltativo                               |
+| _ab_end_                  | Fine terapia antibiotica      | therapy.stop_datetime           | Facoltativo                               |
+| _outcome_                 | Esito paziente                | admission.outcome               | Codifica standard PROSAFE                |
+| _notes_                   | Note libere                   | event_notes.text                | Campi opzionali                           |
 
 
-### 10.2 Checklist validazione manuale
-
+### 9.2  Checklist validazione manuale:
 **Sezione A -- Identificazione evento**
-
--   patient\_id, admission\_id, data evento, tipo evento, device
-    associato
+-   patient\_id, admission\_id, data evento, tipo evento, devic associato
 
 **Sezione B -- Evidenze automatiche**
-
 -   Microbiologia positiva, criteri clinici, device presente, antibiotico somministrato. 
 
 **Sezione C -- Revisione manuale**
-
--   Conferma device, segni clinici, imaging, valutazione CDC/ECDC,
-    conclusione revisore
+-   Conferma device, segni clinici, imaging, valutazione CDC/ECDC, conclusione revisore
 
 **Sezione D -- Confronto**
-
 -   Concordanza automatico/manuale, commenti
 
 **Sezione E -- Analisi aggregata**
+-   Sensibilità (%), Specificità (%), Falsi positivi/negativi, azioni correttive
 
--   Sensibilità (%), Specificità (%), Falsi positivi/negativi, azioni
-    correttive
+## 10. Appendici
 
-### 10.3 Codice Python prototipo
+### 10.1 Codice Python prototipo
 
 Gli eventi ICA potrebbero essere prodotti come FHIR bundle, applicando le regole di identificazione ad un dataset che proviene da Digistat, di cui ancora non abbiamo i dettagli. Utilizzo un mock dataset per dimostrare la produzione del bundle.
 Il codice completo può essere scaricato al seguente link
@@ -377,7 +355,7 @@ In effetti, i passi successivi potrebbero essere:
 -   Convalidare il bundle -\> \...
 -   Invio a endpoint FHIR -\> \....
 
-### 10.4 Lista delle abbreviazioni
+### 10.2 Lista delle abbreviazioni
 | **Abb.** | **Descrizione** |
 |----------------|----------------|
 | **ADT**        | Admission, Discharge, Transfer — Messaggi HL7 che segnalano ricoveri, dimissioni e trasferimenti dei pazienti. |
@@ -409,12 +387,14 @@ In effetti, i passi successivi potrebbero essere:
 | **TI/UTI**     | Terapia Intensiva / Unità di Terapia Intensiva — Reparto di rianimazione. |
 | **VAP**        | Ventilator-Associated Pneumonia — Polmonite associata a ventilazione meccanica. |
 
-### 10.5 Bibliografia
+### 10.3 Bibliografia
 
 -   Salinas JL, Kritzman J, Kobayashi T, Edmond MB, Ince D, Diekema DJ.
     **A primer on data visualization in infection prevention and
     antimicrobial stewardship**. Infect Control Hosp Epidemiol. 2020
     Aug;41(8):948-957. <https://doi.org/10.1017/ice.2020.142>
+-   The NHSN Standardized Infection Ratio (SIR). **A Guide to the SIR**; 2022.
+    <https://www.cdc.gov/nhsn/pdfs/ps-analysis-resources/nhsn-sir-guide.pdf>
 -   Rabiei, R., Bastani, P., Ahmadi, H. *et al.* **Developing public
     health surveillance dashboards: a scoping review on the design
     principles.** *BMC Public Health* **24**, 392 (2024).
