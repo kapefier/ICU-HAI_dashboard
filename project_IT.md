@@ -27,7 +27,8 @@ L'output finale e di facile consultabilità dovrebbe essere a mio avviso
 una dashboard, del tipo dei sistemi di business intelligence (BI), il
 cui aspetto potrebbe assomigliare a questo (vedi bibliografia):
 
-[]{.image}
+![Dashboard-Esempio](/data/exampledashboard.png)
+
 
 ## 2. Fonti Dati
 
@@ -260,15 +261,108 @@ Ipotizzo qualcosa del genere:
 -   Sensibilità (%), Specificità (%), Falsi positivi/negativi, azioni
     correttive
 
-### 10.3 Codice Python prototipo (feed diretto Digistat → FHIR), su Colab
+### 10.3 Codice Python prototipo
 
+Gli eventi ICA potrebbero essere prodotti come FHIR bundle, applicando le regole di identificazione ad un dataset che proviene da Digistat, di cui ancora non abbiamo i dettagli. Utilizzo un mock dataset per dimostrare la produzione del bundle.
 Il codice completo può essere scaricato al seguente link
 [*FHIRbundle.ipyb*](https://colab.research.google.com/drive/130KMU1Tu5Ub4w9le-nqkwKNB4U_ESFWu?usp=drive_link).
 
-\
-Di seguito uno screenshot da Google Colab:
+Di seguito, un frammento del codice dimostrativo: 
 
-[]{.image}
+```python
+# FHIRbundle.ypinb
+#
+# Generazione di FHIR bundle da dati simulati
+# O. Sagliocco
+# --------------------------------------------
+
+# importa le librerie
+
+import json
+from datetime import datetime
+from google.colab import drive
+
+# --- Monta Google Drive per salvare il JSON
+
+drive.mount('/content/drive')
+
+# --- Genera mock dati (tipo Digistat,
+#     ipotetico, non abbiamo ancora accesso alla struttura dati)
+
+patients = [
+    {"patient_id": "12345", "admission_id": "A001"},
+]
+
+device_sessions = [
+    {"patient_id": "12345", "device_type": "CVC",
+     "start_datetime": datetime(2025, 9, 10, 12, 0),
+     "stop_datetime": None},  # ancora in uso
+]
+
+microbiology_results = [
+    {"patient_id": "12345", "sample_datetime": datetime(2025, 9, 20, 10, 30),
+     "sample_type": "blood", "organism": "Klebsiella pneumoniae"}
+]
+
+# --- Applica Logica di definizine di una ICA
+#     in questo esempio è una CLABSI
+
+ica_events = []
+for micro in microbiology_results:
+    for device in device_sessions:
+        if device["patient_id"] == micro["patient_id"] and device["device_type"] == "CVC":
+            start = device["start_datetime"]
+            stop = device["stop_datetime"] or datetime.now()
+            if start <= micro["sample_datetime"] <= stop:
+                ica_events.append({
+                    "patient_id": micro["patient_id"],
+                    "event_type": "CLABSI",
+                    "event_datetime": micro["sample_datetime"],
+                    "organism": micro["organism"],
+                    "device_type": "CVC",
+                    "device_start": start,
+                    "device_stop": stop
+                })
+
+# --- Genera FHIR Bundle
+
+fhir_bundle = {"resourceType": "Bundle", "type": "collection", "entry": []}
+
+for event in ica_events:
+    patient_ref = {"reference": f"Patient/{event['patient_id']}"}
+
+    device_resource = {
+        "resourceType": "Device",
+        "id": f"device-{event['patient_id']}",
+        "status": "active",
+        "type": {"coding": [{"system": "http://snomed.info/sct", "code": "26412008",
+                             "display": "Central venous catheter"}]},
+        "patient": patient_ref,
+        "period": {"start": event["device_start"].isoformat(),
+                   "end": event["device_stop"].isoformat() if event["device_stop"] else None}
+    }
+
+    observation_resource = {
+        "resourceType": "Observation",
+        "id": f"obs-{event['patient_id']}",
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                                  "code": "laboratory"}]}],
+        "code": {"coding": [{"system": "http://loinc.org",
+                             "code": "600-7",
+                             "display": "Bacteria identified in Blood by Culture"}]},
+        "subject": patient_ref,
+        "effectiveDateTime": event["event_datetime"].isoformat(),
+        "valueCodeableConcept": {"coding": [{"system": "http://www.whocc.no/atc",
+                                             "code": event["organism"].upper().replace(" ","_"),
+                                             "display": event["organism"]}]}
+    }
+
+    fhir_bundle["entry"].append({"resource": device_resource})
+    fhir_bundle["entry"].append({"resource": observation_resource})
+ 
+
+```
 
 L'output generato è un file JSON contenente il bundle FHIR di una CLABSI
 su dati simulati, scaricabile al link
