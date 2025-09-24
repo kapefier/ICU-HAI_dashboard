@@ -2,7 +2,7 @@
 
 # MONITORAGGIO NEAR REAL-TIME DELLE ICA IN TERAPIA INTENSIVA 
 
-###### PROPOSTA DI PROTOCOLLO
+###### Ipotesi di progetto
 ###### v 0.1, 20.09.2025
 
 Orlando Sagliocco, MD MSc(Biostat)\
@@ -241,7 +241,7 @@ Ipotizzo qualcosa del genere:
 
 ### 10.1 Codice Python prototipo
 
-Gli eventi ICA potrebbero essere prodotti come FHIR bundle, applicando le regole di identificazione ad un dataset che proviene da Digistat, di cui ancora non abbiamo i dettagli. Utilizzo un mock dataset per dimostrare la produzione del bundle.
+Gli eventi ICA potrebbero essere prodotti come FHIR bundle, applicando le regole di identificazione ad un dataset che viene prodotto in polling con feed che provengono da Digistat (i denominatori dei KPI) e da PROSAFE (i numeratori dei KPI). Di entramni i DB non conosco ancora le specifiche tecniche per cui itilizzo un mock dataset per dimostrare la produzione del bundle.
 Il codice completo può essere scaricato al seguente link [*FHIRbundle.py*](code/FHIRbundle.py).
  
 Di seguito, un frammento del codice dimostrativo: 
@@ -372,6 +372,7 @@ In effetti, i passi successivi potrebbero essere:
 | **GI**         | Gastrointestinal Infection — Infezione gastrointestinale (es. C. difficile). |
 | **HL7**        | Health Level Seven — Famiglia di standard per interoperabilità sanitaria (HL7 v2, CDA, FHIR). |
 | **ICA**        | Infezioni Correlate all'Assistenza — Infezioni acquisite durante cure e procedure sanitarie. |
+| **KPI**. | Key Performance Indicator — a quantifiable measure of performance over time for a specific objective. |
 | **JSON** | JavaScript Object Notation — formato per lo scambio dati basato sul linguaggio di programmazione JavaScript. |
 | **LIS**        | Laboratory Information System — Sistema informativo di laboratorio. |
 | **LRTI**       | Lower Respiratory Tract Infection — Infezione delle basse vie respiratorie (non VAP). |
