@@ -372,7 +372,7 @@ In effetti, i passi successivi potrebbero essere:
 | **GI**         | Gastrointestinal Infection — Infezione gastrointestinale (es. C. difficile). |
 | **HL7**        | Health Level Seven — Famiglia di standard per interoperabilità sanitaria (HL7 v2, CDA, FHIR). |
 | **ICA**        | Infezioni Correlate all'Assistenza — Infezioni acquisite durante cure e procedure sanitarie. |
-| **JSON** | JavaScript Object Notation — formato per lo scambio dati basato sul linguaggio di programmazione JavaScript |
+| **JSON** | JavaScript Object Notation — formato per lo scambio dati basato sul linguaggio di programmazione JavaScript. |
 | **LIS**        | Laboratory Information System — Sistema informativo di laboratorio. |
 | **LRTI**       | Lower Respiratory Tract Infection — Infezione delle basse vie respiratorie (non VAP). |
 | **MDR**        | Multi-Drug Resistant — Ceppi di germi che mostrano capacità di resistenza a più di un antimicrobico. |
