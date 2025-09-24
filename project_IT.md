@@ -242,7 +242,7 @@ Ipotizzo qualcosa del genere:
 ### 10.1 Codice Python prototipo
 
 Gli eventi ICA potrebbero essere prodotti come FHIR bundle, applicando le regole di identificazione ad un dataset che proviene da Digistat, di cui ancora non abbiamo i dettagli. Utilizzo un mock dataset per dimostrare la produzione del bundle.
-Il codice completo può essere scaricato al seguente link [*FHIRbundle.ipyb*](code/FHIRbundle.ipyb).
+Il codice completo può essere scaricato al seguente link [*FHIRbundle.py*](code/FHIRbundle.py).
  
 Di seguito, un frammento del codice dimostrativo: 
 
