@@ -1,2 +1,3 @@
-![QR](https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=https://github.com/kapefier/ICU-HAI_dashboard/)
-![QR Code](https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=https://github.com/)
+This is a QRcode linking to **project_IT.md**.
+\
+![QR Code](https://quickchart.io/qr?text=https%3A%2F%2Fgithub.com%2Fciao&size=200)
