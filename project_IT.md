@@ -1,9 +1,10 @@
- 
-
-# MONITORAGGIO NEAR REAL-TIME DELLE ICA IN TERAPIA INTENSIVA 
+# MONITORAGGIO NEAR REAL-TIME DELLE ICA IN TERAPIA INTENSIVA
 
 ###### Ipotesi di progetto
+
 ###### v 0.1, 20.09.2025
+
+--- 
 
 Orlando Sagliocco, MD MSc(Biostat)\
 UO Terapia Intensiva\
@@ -12,6 +13,9 @@ ASST Bergamo Est
 <orlando.sagliocco@asst-bergamoest.it>\
 <orlando.sagliocco@gmail.com>\
 <https://github.com/kapefier>
+
+----------
+
 
 
 ## 1. Obiettivo
@@ -29,85 +33,76 @@ cui aspetto potrebbe assomigliare a questo (vedi bibliografia):
 
 ![Dashboard-Esempio](/data/exampledashboard.png)
 
-
 ## 2. Fonti Dati
 
-| **Fonte**              | **Dati principali**                                                                                                          | **Modalità integrazione**            |
-|-------------------------|-------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
-| **Digistat EHR**       | Device (ventilatore, CVC, catetere vescicale), parametri clinici strutturati, note infermieristiche, procedure chirurgiche     | SQL diretto / API REST / feed FHIR   |
-| **LIS / Microbiology** | Colture, antibiogrammi, campioni (blood, urine, respiratory)                                                                 | HL7 ORU / API FHIR                   |
-| **HIS / ADT**          | Ricoveri, ingressi/uscite reparto, anagrafica paziente                                                                       | HL7 ADT / API                        |
-
+| **Fonte**              | **Dati principali**                                                                                                        | **Modalità integrazione**          |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| **Digistat EHR**       | Device (ventilatore, CVC, catetere vescicale), parametri clinici strutturati, note infermieristiche, procedure chirurgiche | SQL diretto / API REST / feed FHIR |
+| **LIS / Microbiology** | Colture, antibiogrammi, campioni (blood, urine, respiratory)                                                               | HL7 ORU / API FHIR                 |
+| **HIS / ADT**          | Ricoveri, ingressi/uscite reparto, anagrafica paziente                                                                     | HL7 ADT / API                      |
 
 ## 3. Architettura del Flusso Dati
 
-1.  **Feed diretto Digistat → Microservizio ETL** (ipotesi principale)[^1]
+1. **Feed diretto Digistat → Microservizio ETL** (ipotesi principale)[^1]
+   
+   - Recupera dati clinici, device e microbiologia in near real-time.
 
-    -   Recupera dati clinici, device e microbiologia in near real-time.
-
-2.  **Elaborazione interna**
-
-    -   Applicazione regole cliniche per identificare eventi ICA.
-    -   Generazione temporanea di eventi candidate (VAP, CLABSI, CAUTI,
-        SSI).
+2. **Elaborazione interna**
+   
+   - Applicazione regole cliniche per identificare eventi ICA.
+   - Generazione temporanea di eventi candidate (VAP, CLABSI, CAUTI,
+     SSI).
 
 3. **Esposizione dati**
+   
+   - Output HL7 v2 ORU o FHIR R4 per invio a PROSAFE / dashboard.
 
-    -   Output HL7 v2 ORU o FHIR R4 per invio a PROSAFE / dashboard.
+4. **Validazione**
+   
+   - Controllo manuale su campione per calibrare regole automatiche.
 
-4.  **Validazione**
-
-    -   Controllo manuale su campione per calibrare regole automatiche.
-
-5.  **Dashboard e reporting**
-
-    -   BI con tassi per 1.000 device-days, trend, microrganismi più frequenti, eventi MDR.
+5. **Dashboard e reporting**
+   
+   - BI con tassi per 1.000 device-days, trend, microrganismi più frequenti, eventi MDR.
 
 ## 4. Campi minimi da mappare
 
+- **Paziente**: patient\_id, data\_nascita, sesso.
 
--   **Paziente**: patient\_id, data\_nascita, sesso.
+- **Ricovero**: admission\_id, reparto\_ingresso, reparto\_uscita,
+  date/time.
 
--   **Ricovero**: admission\_id, reparto\_ingresso, reparto\_uscita,
-    date/time.
+- **Device**: ventilatore, CVC, catetere vescicale (start/stop).
 
--   **Device**: ventilatore, CVC, catetere vescicale (start/stop).
+- **Procedure chirurgiche**: tipo intervento, data.
 
+- **Microbiologia**: tipo campione, data prelievo, organismo,
+  antibiogramma.
 
--   **Procedure chirurgiche**: tipo intervento, data.
+- **Terapia antibiotica**: inizio/fine, farmaco, dosaggio.
 
-
--   **Microbiologia**: tipo campione, data prelievo, organismo,
-    antibiogramma.
-
--   **Terapia antibiotica**: inizio/fine, farmaco, dosaggio.
-
--   **Segni clinici strutturati**: febbre, leucocitosi, parametri
-    vitali.
+- **Segni clinici strutturati**: febbre, leucocitosi, parametri
+  vitali.
 
 ## 5. Regole di identificazione
 
--   **CLABSI:** emocoltura positiva + CVC presente → probabilità CLABSI.
+- **CLABSI:** emocoltura positiva + CVC presente → probabilità CLABSI.
 
+- **VAP:** paziente ventilato ≥48h + segni clinici + coltura
+  respiratoria positiva → probabilità VAP.
 
--   **VAP:** paziente ventilato ≥48h + segni clinici + coltura
-    respiratoria positiva → probabilità VAP.
+- **CAUTI:** coltura urinaria positiva + catetere presente ≥48h →
+  probabilità CAUTI.
 
+- **SSI:** post-chirurgia con coltura o diagnosi clinica entro 30--90
+  giorni.
 
--   **CAUTI:** coltura urinaria positiva + catetere presente ≥48h →
-    probabilità CAUTI.
-
-
--   **SSI:** post-chirurgia con coltura o diagnosi clinica entro 30--90
-    giorni.
-
-
--   **Extended (stand-by):** logiche analoghe su LRTI, SSTI, GI, CNSI.
+- **Extended (stand-by):** logiche analoghe su LRTI, SSTI, GI, CNSI.
 
 Riporto uno pseudocodice per le regole di identificazione, da tradure
 poi in query SQL o Python in base alle scelte progettuali:
 
-```bash 
+```bash
 INPUT:
 - Lista ricoveri (patient_id, admission_id, icu_entry, icu_exit)
 - Device log (device_type, start, stop)
@@ -159,8 +154,9 @@ FOR ogni paziente IN ricoveri:
 OUTPUT:
 - Lista eventi ICA (patient_id, admission_id, tipo_evento, data, device, organismo, status)
 ```
- 
+
 ## 6. Feed diretto e standard di interoperabilita'
+
 - **Feed diretto Digistat:** SQL o API REST/FHIR → microservizio ETL.
 - **Output standard:**  
   - HL7 ORU v2 (per legacy e PROSAFE).
@@ -171,71 +167,77 @@ OUTPUT:
 
 Ipotizzo qualcosa del genere:
 
--   Estrazione campione eventi automatici.
+- Estrazione campione eventi automatici.
 
--   Revisione manuale cartelle cliniche (checklist standard).
+- Revisione manuale cartelle cliniche (checklist standard).
 
--   Confronto automatico vs manuale → calcolo sensibilità, specificità,
-    falsi positivi/negativi.
+- Confronto automatico vs manuale → calcolo sensibilità, specificità,
+  falsi positivi/negativi.
 
--   Iterazioni e affinamento regole.
+- Iterazioni e affinamento regole.
 
--   Go-live limitato e monitoraggio continuo.
+- Go-live limitato e monitoraggio continuo.
 
 ## 8. Strumenti e tecnologie ipotizzate
 
--   **Middleware / Integration engine:** Mirth Connect, Digistat API.
+- **Middleware / Integration engine:** Mirth Connect, Digistat API.
 
--   **Microservizio ETL:** Python (pandas, sqlalchemy), Node.js, o altro
-    linguaggio aziendale.
+- **Microservizio ETL:** Python (pandas, sqlalchemy), Node.js, o altro
+  linguaggio aziendale.
 
--   **Standard di interoperabilità:** HL7 v2, FHIR R4.
+- **Standard di interoperabilità:** HL7 v2, FHIR R4.
 
--   **Data storage temporaneo:** filesystem sicuro o DB locale per
-    elaborazioni intermedie.
+- **Data storage temporaneo:** filesystem sicuro o DB locale per
+  elaborazioni intermedie.
 
--   **BI / dashboard:** web-app custom made[^2] (per me scelta consigliata), oppure Power BI, Tableau o altri prodotti commerciali.
+- **BI / dashboard:** web-app custom made[^2] (per me scelta consigliata), oppure Power BI, Tableau o altri prodotti commerciali.
 
 ## 9. Template mapping e checklist
 
 ### 9.1   **Mapping Digistat → PROSAFE:**
-| **Campo_PROSAFE**       | **Descrizione**                | **Campo_Digistat_Esempio**       | **Note**                                  |
-|-------------------------|-------------------------------|---------------------------------|------------------------------------------|
-| _patient_id_              | Identificativo paziente       | admission.patient_id            | Anonimizzato/pseudonimizzato            |
-| _admission_id_            | ID ricovero                   | admission.admission_id          | Collegato a degenza TI                   |
-| _icu_entry_date_          | Data ingresso TI              | admission.icu_in_datetime       | Obbligatorio                             |
-| _icu_exit_date_           | Data uscita TI                | admission.icu_out_datetime      | Obbligatorio                             |
-| _event_id_                | ID evento ICA                 | generato algoritmo              | Progressivo                               |
-| _event_date_              | Data evento ICA               | ica_events.event_datetime       | Data primo criterio positivo             |
-| _event_type_              | Tipo ICA                      | ica_events.event_type           | Codice standard PROSAFE                  |
-| _device_type_             | Dispositivo associato         | device_sessions.device_type     | Valorizzare se presente                  |
-| _device_insertion_date_   | Data inserimento dispositivo  | device_sessions.start_datetime  | Se applicabile                           |
-| _device_removal_date_     | Data rimozione dispositivo    | device_sessions.stop_datetime   | Se applicabile                           |
-| _specimen_type_           | Tipo campione                 | microbiology.sample_type        | Uniformare a codici PROSAFE             |
-| _specimen_date_           | Data prelievo                 | microbiology.sample_datetime    | Obbligatorio se microbiologia positiva  |
-| _microorganism_           | Agente eziologico             | microbiology.organism           | Codice standard                           |
-| _antibiogram_             | Profilo di resistenza         | microbiology.antibiogram        | Standard S/I/R                            |
-| _ab_start_                | Inizio terapia antibiotica    | therapy.start_datetime          | Facoltativo                               |
-| _ab_end_                  | Fine terapia antibiotica      | therapy.stop_datetime           | Facoltativo                               |
-| _outcome_                 | Esito paziente                | admission.outcome               | Codifica standard PROSAFE                |
-| _notes_                   | Note libere                   | event_notes.text                | Campi opzionali                           |
 
+| **Campo_PROSAFE**       | **Descrizione**              | **Campo_Digistat_Esempio**     | **Note**                               |
+| ----------------------- | ---------------------------- | ------------------------------ | -------------------------------------- |
+| _patient_id_            | Identificativo paziente      | admission.patient_id           | Anonimizzato/pseudonimizzato           |
+| _admission_id_          | ID ricovero                  | admission.admission_id         | Collegato a degenza TI                 |
+| _icu_entry_date_        | Data ingresso TI             | admission.icu_in_datetime      | Obbligatorio                           |
+| _icu_exit_date_         | Data uscita TI               | admission.icu_out_datetime     | Obbligatorio                           |
+| _event_id_              | ID evento ICA                | generato algoritmo             | Progressivo                            |
+| _event_date_            | Data evento ICA              | ica_events.event_datetime      | Data primo criterio positivo           |
+| _event_type_            | Tipo ICA                     | ica_events.event_type          | Codice standard PROSAFE                |
+| _device_type_           | Dispositivo associato        | device_sessions.device_type    | Valorizzare se presente                |
+| _device_insertion_date_ | Data inserimento dispositivo | device_sessions.start_datetime | Se applicabile                         |
+| _device_removal_date_   | Data rimozione dispositivo   | device_sessions.stop_datetime  | Se applicabile                         |
+| _specimen_type_         | Tipo campione                | microbiology.sample_type       | Uniformare a codici PROSAFE            |
+| _specimen_date_         | Data prelievo                | microbiology.sample_datetime   | Obbligatorio se microbiologia positiva |
+| _microorganism_         | Agente eziologico            | microbiology.organism          | Codice standard                        |
+| _antibiogram_           | Profilo di resistenza        | microbiology.antibiogram       | Standard S/I/R                         |
+| _ab_start_              | Inizio terapia antibiotica   | therapy.start_datetime         | Facoltativo                            |
+| _ab_end_                | Fine terapia antibiotica     | therapy.stop_datetime          | Facoltativo                            |
+| _outcome_               | Esito paziente               | admission.outcome              | Codifica standard PROSAFE              |
+| _notes_                 | Note libere                  | event_notes.text               | Campi opzionali                        |
 
 ### 9.2  Checklist validazione manuale:
+
 **Sezione A -- Identificazione evento**
--   patient\_id, admission\_id, data evento, tipo evento, devic associato
+
+- patient\_id, admission\_id, data evento, tipo evento, devic associato
 
 **Sezione B -- Evidenze automatiche**
--   Microbiologia positiva, criteri clinici, device presente, antibiotico somministrato. 
+
+- Microbiologia positiva, criteri clinici, device presente, antibiotico somministrato. 
 
 **Sezione C -- Revisione manuale**
--   Conferma device, segni clinici, imaging, valutazione CDC/ECDC, conclusione revisore
+
+- Conferma device, segni clinici, imaging, valutazione CDC/ECDC, conclusione revisore
 
 **Sezione D -- Confronto**
--   Concordanza automatico/manuale, commenti
+
+- Concordanza automatico/manuale, commenti
 
 **Sezione E -- Analisi aggregata**
--   Sensibilità (%), Specificità (%), Falsi positivi/negativi, azioni correttive
+
+- Sensibilità (%), Specificità (%), Falsi positivi/negativi, azioni correttive
 
 ## 10. Appendici
 
@@ -243,7 +245,7 @@ Ipotizzo qualcosa del genere:
 
 Gli eventi ICA potrebbero essere prodotti come FHIR bundle, applicando le regole di identificazione ad un dataset che viene prodotto in polling con feed che provengono da Digistat (i denominatori dei KPI) e da PROSAFE (i numeratori dei KPI). Di entramni i DB non conosco ancora le specifiche tecniche per cui itilizzo un mock dataset per dimostrare la produzione del bundle.
 Il codice completo può essere scaricato al seguente link [*FHIRbundle.py*](code/FHIRbundle.py).
- 
+
 Di seguito, un frammento del codice dimostrativo: 
 
 ```python
@@ -337,9 +339,8 @@ for event in ica_events:
 
     fhir_bundle["entry"].append({"resource": device_resource})
     fhir_bundle["entry"].append({"resource": observation_resource})
- 
-
 ```
+
 E' possibile eseguire il codice completo in Google Colaboratory: \
 [![Apri in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/130KMU1Tu5Ub4w9le-nqkwKNB4U_ESFWu?usp=drive_link)
 
@@ -350,55 +351,56 @@ Una volta scaricato può essere visualizzato in un browser, la maggior ormai sup
 
 In effetti, i passi successivi potrebbero essere:
 
--   Convalidare il bundle -\> \...
--   Invio a endpoint FHIR -\> \....
+- Convalidare il bundle -\> \...
+- Invio a endpoint FHIR -\> \....
 
 ### 10.2 Lista delle abbreviazioni
-| **Abb.** | **Descrizione** |
-|----------------|----------------|
-| **ADT**        | Admission, Discharge, Transfer — Messaggi HL7 che segnalano ricoveri, dimissioni e trasferimenti dei pazienti. |
-| **API**        | Application Programming Interface — Interfaccia software che consente la comunicazione tra applicazioni. |
-| **API REST**   | RESTful Application Programming Interface — API basata su HTTP/JSON secondo l'architettura REST. |
-| **BI**         | Business Intelligence — Strumenti per analisi dati e visualizzazione dashboard. |
-| **CAUTI**      | Catheter-Associated Urinary Tract Infection — Infezione urinaria associata a catetere vescicale. |
-| **CDC**        | Centers for Disease Control and Prevention — Agenzia statunitense per la salute pubblica. |
-| **CLABSI**     | Central Line-Associated Bloodstream Infection — Batteriemia associata a catetere venoso centrale. |
-| **CNSI**       | Central Nervous System Infection — Infezione del sistema nervoso centrale (es. meningite, ventricolite). |
-| **DB**         | Database — Archivio strutturato di dati, interrogabile tramite SQL. |
-| **ECDC**       | European Centre for Disease Prevention and Control — Agenzia europea per la prevenzione e il controllo delle malattie. |
-| **EHR**        | Electronic Health Record — Cartella clinica elettronica (es. Digistat). |
-| **ETL**        | Extract, Transform, Load — Processo di estrazione, trasformazione e caricamento dei dati. |
-| **FHIR**       | Fast Healthcare Interoperability Resources — Standard HL7 per interoperabilità moderna (REST/JSON/XML). |
-| **GI**         | Gastrointestinal Infection — Infezione gastrointestinale (es. C. difficile). |
-| **HL7**        | Health Level Seven — Famiglia di standard per interoperabilità sanitaria (HL7 v2, CDA, FHIR). |
-| **ICA**        | Infezioni Correlate all'Assistenza — Infezioni acquisite durante cure e procedure sanitarie. |
-| **JSON** | JavaScript Object Notation — formato per lo scambio dati basato sul linguaggio di programmazione JavaScript. |
-| **KPI** | Key Performance Indicator — a quantifiable measure of performance over time for a specific objective. |
-| **LIS**        | Laboratory Information System — Sistema informativo di laboratorio. |
-| **LRTI**       | Lower Respiratory Tract Infection — Infezione delle basse vie respiratorie (non VAP). |
-| **MDR**        | Multi-Drug Resistant — Ceppi di germi che mostrano capacità di resistenza a più di un antimicrobico. |
-| **ORU**        | Observation Result Unsolicited — Messaggio HL7 v2 per trasmissione referti di laboratorio. |
-| **PROSAFE**    | PROmoting SAFEty in intensive care — Programma nazionale orientato al benchmarking delle terapie intensive in Italia, con focus anche su aspetti infettivologici (petalo Infections) |
-| **R4**         | Release 4 — Versione stabile e diffusa dello standard FHIR. |
-| **SIR**        | Strandardazied Infection Ratio — a statistic used to track healthcare associated infections (HAIs) over time, at a national, state, or facility level. |
-| **SQL**        | Structured Query Language — Linguaggio standard per interrogazione database relazionali. |
-| **SSI**        | Surgical Site Infection — Infezione del sito chirurgico. |
-| **SSTI**       | Skin and Soft Tissue Infection — Infezione cutanea e dei tessuti molli. |
-| **TI/UTI**     | Terapia Intensiva / Unità di Terapia Intensiva — Reparto di rianimazione. |
-| **VAP**        | Ventilator-Associated Pneumonia — Polmonite associata a ventilazione meccanica. |
+
+| **Abb.**     | **Descrizione**                                                                                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **ADT**      | Admission, Discharge, Transfer — Messaggi HL7 che segnalano ricoveri, dimissioni e trasferimenti dei pazienti.                                                                       |
+| **API**      | Application Programming Interface — Interfaccia software che consente la comunicazione tra applicazioni.                                                                             |
+| **API REST** | RESTful Application Programming Interface — API basata su HTTP/JSON secondo l'architettura REST.                                                                                     |
+| **BI**       | Business Intelligence — Strumenti per analisi dati e visualizzazione dashboard.                                                                                                      |
+| **CAUTI**    | Catheter-Associated Urinary Tract Infection — Infezione urinaria associata a catetere vescicale.                                                                                     |
+| **CDC**      | Centers for Disease Control and Prevention — Agenzia statunitense per la salute pubblica.                                                                                            |
+| **CLABSI**   | Central Line-Associated Bloodstream Infection — Batteriemia associata a catetere venoso centrale.                                                                                    |
+| **CNSI**     | Central Nervous System Infection — Infezione del sistema nervoso centrale (es. meningite, ventricolite).                                                                             |
+| **DB**       | Database — Archivio strutturato di dati, interrogabile tramite SQL.                                                                                                                  |
+| **ECDC**     | European Centre for Disease Prevention and Control — Agenzia europea per la prevenzione e il controllo delle malattie.                                                               |
+| **EHR**      | Electronic Health Record — Cartella clinica elettronica (es. Digistat).                                                                                                              |
+| **ETL**      | Extract, Transform, Load — Processo di estrazione, trasformazione e caricamento dei dati.                                                                                            |
+| **FHIR**     | Fast Healthcare Interoperability Resources — Standard HL7 per interoperabilità moderna (REST/JSON/XML).                                                                              |
+| **GI**       | Gastrointestinal Infection — Infezione gastrointestinale (es. C. difficile).                                                                                                         |
+| **HL7**      | Health Level Seven — Famiglia di standard per interoperabilità sanitaria (HL7 v2, CDA, FHIR).                                                                                        |
+| **ICA**      | Infezioni Correlate all'Assistenza — Infezioni acquisite durante cure e procedure sanitarie.                                                                                         |
+| **JSON**     | JavaScript Object Notation — formato per lo scambio dati basato sul linguaggio di programmazione JavaScript.                                                                         |
+| **KPI**      | Key Performance Indicator — a quantifiable measure of performance over time for a specific objective.                                                                                |
+| **LIS**      | Laboratory Information System — Sistema informativo di laboratorio.                                                                                                                  |
+| **LRTI**     | Lower Respiratory Tract Infection — Infezione delle basse vie respiratorie (non VAP).                                                                                                |
+| **MDR**      | Multi-Drug Resistant — Ceppi di germi che mostrano capacità di resistenza a più di un antimicrobico.                                                                                 |
+| **ORU**      | Observation Result Unsolicited — Messaggio HL7 v2 per trasmissione referti di laboratorio.                                                                                           |
+| **PROSAFE**  | PROmoting SAFEty in intensive care — Programma nazionale orientato al benchmarking delle terapie intensive in Italia, con focus anche su aspetti infettivologici (petalo Infections) |
+| **R4**       | Release 4 — Versione stabile e diffusa dello standard FHIR.                                                                                                                          |
+| **SIR**      | Strandardazied Infection Ratio — a statistic used to track healthcare associated infections (HAIs) over time, at a national, state, or facility level.                               |
+| **SQL**      | Structured Query Language — Linguaggio standard per interrogazione database relazionali.                                                                                             |
+| **SSI**      | Surgical Site Infection — Infezione del sito chirurgico.                                                                                                                             |
+| **SSTI**     | Skin and Soft Tissue Infection — Infezione cutanea e dei tessuti molli.                                                                                                              |
+| **TI/UTI**   | Terapia Intensiva / Unità di Terapia Intensiva — Reparto di rianimazione.                                                                                                            |
+| **VAP**      | Ventilator-Associated Pneumonia — Polmonite associata a ventilazione meccanica.                                                                                                      |
 
 ### 10.3 Bibliografia
 
--   Salinas JL, Kritzman J, Kobayashi T, Edmond MB, Ince D, Diekema DJ.
-    **A primer on data visualization in infection prevention and
-    antimicrobial stewardship**. Infect Control Hosp Epidemiol. 2020
-    Aug;41(8):948-957. <https://doi.org/10.1017/ice.2020.142>
--   The NHSN Standardized Infection Ratio (SIR). **A Guide to the SIR**; 2022.
-    <https://www.cdc.gov/nhsn/pdfs/ps-analysis-resources/nhsn-sir-guide.pdf>
--   Rabiei, R., Bastani, P., Ahmadi, H. *et al.* **Developing public
-    health surveillance dashboards: a scoping review on the design
-    principles.** *BMC Public Health* **24**, 392 (2024).
-    <https://doi.org/10.1186/s12889-024-17841-2>
+- Salinas JL, Kritzman J, Kobayashi T, Edmond MB, Ince D, Diekema DJ.
+  **A primer on data visualization in infection prevention and
+  antimicrobial stewardship**. Infect Control Hosp Epidemiol. 2020
+  Aug;41(8):948-957. <https://doi.org/10.1017/ice.2020.142>
+- The NHSN Standardized Infection Ratio (SIR). **A Guide to the SIR**; 2022.
+  <https://www.cdc.gov/nhsn/pdfs/ps-analysis-resources/nhsn-sir-guide.pdf>
+- Rabiei, R., Bastani, P., Ahmadi, H. *et al.* **Developing public
+  health surveillance dashboards: a scoping review on the design
+  principles.** *BMC Public Health* **24**, 392 (2024).
+  <https://doi.org/10.1186/s12889-024-17841-2>
 
 [^1]:  in alternativa, si deve far uso della datawarehouse con query
     PostegreSQL
