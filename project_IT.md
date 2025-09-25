@@ -4,19 +4,11 @@
 
 ###### v 0.1, 20.09.2025
 
---- 
-
 Orlando Sagliocco, MD MSc(Biostat)\
-UO Terapia Intensiva\
-ASST Bergamo Est
 
 <orlando.sagliocco@asst-bergamoest.it>\
 <orlando.sagliocco@gmail.com>\
 <https://github.com/kapefier>
-
-----------
-
-
 
 ## 1. Obiettivo
 
