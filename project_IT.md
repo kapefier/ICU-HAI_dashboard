@@ -374,7 +374,7 @@ In effetti, i passi successivi potrebbero essere:
 | **ORU**      | Observation Result Unsolicited — Messaggio HL7 v2 per trasmissione referti di laboratorio.                                                                                           |
 | **PROSAFE**  | PROmoting SAFEty in intensive care — Programma nazionale orientato al benchmarking delle terapie intensive in Italia, con focus anche su aspetti infettivologici (petalo Infections) |
 | **R4**       | Release 4 — Versione stabile e diffusa dello standard FHIR.                                                                                                                          |
-| **SIR**      | Strandardazied Infection Ratio — a statistic used to track healthcare associated infections (HAIs) over time, at a national, state, or facility level.                               |
+| **SIR**      | Standardized Infection Ratio — a statistic used to track healthcare associated infections (HAIs) over time, at a national, state, or facility level.                               |
 | **SQL**      | Structured Query Language — Linguaggio standard per interrogazione database relazionali.                                                                                             |
 | **SSI**      | Surgical Site Infection — Infezione del sito chirurgico.                                                                                                                             |
 | **SSTI**     | Skin and Soft Tissue Infection — Infezione cutanea e dei tessuti molli.                                                                                                              |
